@@ -1,0 +1,65 @@
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+  analyze_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.1'
+          cache: true
+
+      - name: Get Dependencies
+        uses: flutter pub get
+
+      - name: Lint Code
+        run: flutter analyze
+
+      - name: Run Test
+        run: flutter test
+
+  buildApks:
+    needs: analyze_and_test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.1'
+
+      - run: flutter pub get
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Upload APK as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: develop-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+  create_pullrequest:
+    needs: buildApks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v
+
+      - name: Create Pull Request to Main
+        uses: peter-evens/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: main
+          branch: dev
+          title: "Merge dev branch to main"
+          body: "Automated Pull Request. All Test are Passed for CI, Please check code first"
