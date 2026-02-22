@@ -9,7 +9,7 @@ jobs:
   build_release_apk:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkoout@v4
+      - uses: actions/checkout@v4
 
       - uses: subosito/flutter-action@v2
         with:
