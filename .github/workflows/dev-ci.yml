@@ -45,7 +45,7 @@ jobs:
       - name: Upload APK as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: develop-apk
+          name: staging-apk
           path: build/app/outputs/flutter-apk/app-release.apk
 
   create_pullrequest:
